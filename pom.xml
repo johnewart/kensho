@@ -149,8 +149,11 @@
             <artifactId>hibernate-core</artifactId>
             <version>4.3.6.Final</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>net.johnewart</groupId>
+            <artifactId>shuzai</artifactId>
+            <version>0.5-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
