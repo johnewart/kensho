@@ -7,15 +7,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.Optional;
-import net.johnewart.chronos.DataFrame;
-import net.johnewart.chronos.Frequency;
-import net.johnewart.chronos.SampleMethod;
-import net.johnewart.chronos.TimeSeries;
+import net.johnewart.shuzai.DataFrame;
+import net.johnewart.shuzai.Frequency;
+import net.johnewart.shuzai.SampleMethod;
+import net.johnewart.shuzai.TimeSeries;
 import net.johnewart.kensho.core.*;
 import net.johnewart.kensho.data.CustomTimeSeriesSerializer;
 import net.johnewart.kensho.stats.QueryCache;
 import net.johnewart.kensho.stats.StatsEngine;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 @Path("/data")
 @Produces(MediaType.APPLICATION_JSON)
 public class DataResource {
+    private static final Logger LOG = LoggerFactory.getLogger(DataResource.class);
     private final ObjectMapper mapper;
     private final StatsEngine statsEngine;
 
@@ -136,7 +139,7 @@ public class DataResource {
     public String averageQueryTime() {
         try {
             return mapper.writeValueAsString(
-                    statsEngine.dbStats.averageQueryTime.downSample(Frequency.of(5, TimeUnit.MINUTES), SampleMethod.MEAN)
+                    statsEngine.dbStats.averageQueryTime.downSample(Frequency.of(30, TimeUnit.SECONDS), SampleMethod.MEAN)
             );
         } catch (JsonProcessingException e) {
             return "{ }";
@@ -149,7 +152,7 @@ public class DataResource {
     public String concurrentQueries() {
         try {
             return mapper.writeValueAsString(
-                    statsEngine.dbStats.concurrentQueries.downSample(Frequency.of(5, TimeUnit.MINUTES), SampleMethod.SUM)
+                    statsEngine.dbStats.concurrentQueries.downSample(Frequency.of(30, TimeUnit.SECONDS), SampleMethod.SUM)
             );
         } catch (JsonProcessingException e) {
             return "{ }";
@@ -162,7 +165,7 @@ public class DataResource {
     public String openConnections() {
         try {
             return mapper.writeValueAsString(
-                    statsEngine.dbStats.connectionCount.downSample(Frequency.of(5, TimeUnit.MINUTES), SampleMethod.MEAN)
+                    statsEngine.dbStats.connectionCount.downSample(Frequency.of(30, TimeUnit.SECONDS), SampleMethod.MEAN)
             );
         } catch (JsonProcessingException e) {
             return "{ }";
@@ -188,16 +191,16 @@ public class DataResource {
                 end = DateTime.parse(endTime.get());
             }
 
-            Frequency dataFrequency = Frequency.of(5, TimeUnit.MINUTES);
+            Frequency frequency = Frequency.of(30, TimeUnit.SECONDS);
             DataFrame<DateTime, BigDecimal> dataFrame = new DataFrame<>();
             dataFrame.add("Average Query Time (ms)",
-                    q.averageQueryTimes.downSampleToTimeWindow(start, end, dataFrequency, SampleMethod.MEAN)
+                    q.averageQueryTimes.downSampleToTimeWindow(start, end, frequency, SampleMethod.MEAN)
             );
             dataFrame.add("Total number of calls",
-                    q.callCounts.downSampleToTimeWindow(start, end, dataFrequency, SampleMethod.SUM)
+                    q.callCounts.downSampleToTimeWindow(start, end, frequency, SampleMethod.SUM)
             );
             dataFrame.add("Total Time Spent (ms)",
-                   q.totalTimes.downSampleToTimeWindow(start, end, dataFrequency, SampleMethod.SUM)
+                   q.totalTimes.downSampleToTimeWindow(start, end, frequency, SampleMethod.SUM)
             );
 
             try {
@@ -219,7 +222,7 @@ public class DataResource {
     @Timed
     @Path("db-stats")
     public String dbstats() {
-        Frequency frequency = Frequency.of(5, TimeUnit.MINUTES);
+        Frequency frequency = Frequency.of(30, TimeUnit.SECONDS);
         DateTime start = DateTime.now().minusHours(1);
         DateTime end = DateTime.now();
 

@@ -40,7 +40,7 @@ public class StatsEngine {
             LOG.debug("Resetting DB stats");
             status.resetStats();
             }
-        }, 10, 30, TimeUnit.SECONDS);
+        }, 1, 2, TimeUnit.SECONDS);
     }
 
 

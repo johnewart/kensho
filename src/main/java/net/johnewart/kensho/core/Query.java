@@ -1,6 +1,6 @@
 package net.johnewart.kensho.core;
 
-import net.johnewart.chronos.TimeSeries;
+import net.johnewart.shuzai.TimeSeries;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;

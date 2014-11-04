@@ -1,9 +1,9 @@
 package net.johnewart.kensho.stats;
 
-import net.johnewart.chronos.DataFrame;
-import net.johnewart.chronos.Frequency;
-import net.johnewart.chronos.SampleMethod;
-import net.johnewart.chronos.TimeSeries;
+import net.johnewart.shuzai.DataFrame;
+import net.johnewart.shuzai.Frequency;
+import net.johnewart.shuzai.SampleMethod;
+import net.johnewart.shuzai.TimeSeries;
 import net.johnewart.kensho.core.PgStatus;
 import net.johnewart.kensho.core.QueryStat;
 import org.joda.time.DateTime;
