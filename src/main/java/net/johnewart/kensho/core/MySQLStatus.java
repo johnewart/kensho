@@ -16,11 +16,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static net.johnewart.kensho.sql.SQL.select;
 
-public class PgStatus implements DatabaseStatus {
+public class MySQLStatus implements DatabaseStatus {
     private final BoneCP connectionPool;
-    private static Logger LOG = LoggerFactory.getLogger(PgStatus.class);
+    private static Logger LOG = LoggerFactory.getLogger(MySQLStatus.class);
 
-    public PgStatus(BoneCP connectionPool) {
+    public MySQLStatus(BoneCP connectionPool) {
         this.connectionPool = connectionPool;
     }
 
@@ -35,38 +35,14 @@ public class PgStatus implements DatabaseStatus {
     }
 
     private List<RunningQuery> getRunningQueries(boolean longRunning) {
-        final String query;
-        if(longRunning) {
-            query = PgStatusQueries.LONG_RUNNING_QUERIES;
-        } else {
-            query = PgStatusQueries.RUNNING_QUERIES;
-        }
 
         List<RunningQuery> runningQueries = new LinkedList<>();
-        selectWithConnection(query, (rs, cnt)-> {
-            RunningQuery rq = new RunningQuery();
-            rq.duration = rs.getString("duration");
-            rq.waiting = rs.getString("waiting");
-            rq.query = rs.getString("query");
-            rq.state = rs.getString("state");
-            rq.source = rs.getString("source");
-            rq.pid = rs.getInt("pid");
-            rq.startedAt = rs.getString("started_at");
-            runningQueries.add(rq);
-        });
         return runningQueries;
     }
 
     @Override
     public List<MissingIndex> getMissingIndices() {
         List<MissingIndex> missingIndices = new LinkedList<>();
-        selectWithConnection(PgStatusQueries.MISSING_INDEXES,(rs, cnt)-> {
-            MissingIndex mi = new MissingIndex();
-            mi.tableName = rs.getString("table");
-            mi.percentOfTimesIndexUsed = rs.getInt("percent_of_times_index_used");
-            mi.rowsInTable = rs.getLong("rows_in_table");
-            missingIndices.add(mi);
-        });
         return missingIndices;
     }
 
@@ -81,22 +57,8 @@ public class PgStatus implements DatabaseStatus {
     }
 
     private List<QueryStat> getQueryStats(boolean slow) {
-        final String query;
-        if (slow) {
-            query = PgStatusQueries.SLOW_QUERIES;
-        } else {
-            query = PgStatusQueries.QUERY_STATS;
-        }
 
         List<QueryStat> queryStats = new LinkedList<>();
-        selectWithConnection(query,(rs, cnt)-> {
-            QueryStat sq = new QueryStat();
-            sq.query = rs.getString("query");
-            sq.totalTime = rs.getLong("total_time");
-            sq.averageTime = rs.getFloat("average_time");
-            sq.numberOfCalls = rs.getLong("calls");
-            queryStats.add(sq);
-        });
         return queryStats;
     }
 
